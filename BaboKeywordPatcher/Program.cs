@@ -14,7 +14,7 @@ namespace BaboKeywordPatcher
         public bool ArmorEroticDefault;
         public bool EroticDresses;
     }
-    
+
     public class Program
     {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -151,8 +151,8 @@ namespace BaboKeywordPatcher
                 return;
             }
             // EroticArmor
-            if (StrMatch(name, "harness") || StrMatch(name, "corset") || StrMatch(name, "StraitJacket") || 
-                StrMatch(name, "hobble") || StrMatch(name, "tentacles") || 
+            if (StrMatch(name, "harness") || StrMatch(name, "corset") || StrMatch(name, "StraitJacket") ||
+                StrMatch(name, "hobble") || StrMatch(name, "tentacles") ||
                 StrMatch(name, "slave") || StrMatch(name, "chastity") || StrMatch(name, "cuff") || StrMatch(name, "binder") ||
                 StrMatch(name, "yoke") || StrMatch(name, "mitten")
                 )
@@ -162,7 +162,7 @@ namespace BaboKeywordPatcher
             }
 
             // EroticArmor
-            if (StrMatch(name, "suit") ||  StrMatch(name, "latex") || StrMatch(name, "rubber") ||
+            if (StrMatch(name, "suit") || StrMatch(name, "latex") || StrMatch(name, "rubber") ||
                 StrMatch(name, "ebonite") || StrMatch(name, "slut") || StrMatch(name, "lingerie") ||
                 (StrMatch(name, "dress") && Settings.Value.EroticDresses)
                 )
@@ -197,8 +197,8 @@ namespace BaboKeywordPatcher
             }
             // SLA_BootsHeels
             IBodyTemplateGetter? bodyTemplate = armor.BodyTemplate;
-            if ((IsDeviousRenderedItem(name) && StrMatch(name, "boots")) || 
-                (StrMatch(name, "heels") && !StrMatch(name, "wheel") && 
+            if ((IsDeviousRenderedItem(name) && StrMatch(name, "boots")) ||
+                (StrMatch(name, "heels") && !StrMatch(name, "wheel") &&
                 bodyTemplate != null && bodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Feet)))
             {
                 matched = true;
@@ -225,7 +225,7 @@ namespace BaboKeywordPatcher
                 {
                     AddTag(armorEditObj, SLA_AnalPlugTail);
                 }
-                else if (StrMatch(name, "beads")) 
+                else if (StrMatch(name, "beads"))
                 {
                     AddTag(armorEditObj, SLA_AnalBeads);
                 }
@@ -233,7 +233,7 @@ namespace BaboKeywordPatcher
                 {
                     AddTag(armorEditObj, SLA_AnalPlug);
                 }
-                
+
             }
             // SLA_PiercingClit
             if (StrMatch(name, "piercingv") || StrMatch(name, "vpiercing"))
@@ -248,7 +248,7 @@ namespace BaboKeywordPatcher
                 AddTag(armorEditObj, SLA_PiercingNipple);
             }
             // SLA_BraArmor
-            if (!StrMatch(name, "bracer") && !StrMatch(name, "brawn") && (StrMatch(name, " bra") || StrMatch(name, "bikini top") || 
+            if (!StrMatch(name, "bracer") && !StrMatch(name, "brawn") && (StrMatch(name, " bra") || StrMatch(name, "bikini top") ||
                 (StrMatch(name, "undergarment") && StrMatch(name, "upper"))))
             {
                 matched = true;
@@ -266,8 +266,8 @@ namespace BaboKeywordPatcher
                 AddTag(armorEditObj, SLA_ThongT);
             }
             //SLA_PantiesNormal
-            if (StrMatch(name, "panties") || StrMatch(name, "panty") || StrMatch(name, "underwear") || StrMatch(name, "binkini bot") || 
-                StrMatch(name, "pants") || (StrMatch(name, "undergarment")  && StrMatch(name, "lower")))
+            if (StrMatch(name, "panties") || StrMatch(name, "panty") || StrMatch(name, "underwear") || StrMatch(name, "binkini bot") ||
+                StrMatch(name, "pants") || (StrMatch(name, "undergarment") && StrMatch(name, "lower")))
             {
                 matched = true;
                 AddTag(armorEditObj, SLA_PantiesNormal);
@@ -297,7 +297,7 @@ namespace BaboKeywordPatcher
                 AddTag(armorEditObj, SLA_ArmorPretty);
             }
             else if (Settings.Value.ArmorEroticDefault && !matched && (StrMatch(name, "armor") || StrMatch(name, "cuiras") || StrMatch(name, "robes")))
-            { 
+            {
                 matched = true;
                 AddTag(armorEditObj, EroticArmor);
             }
@@ -311,57 +311,31 @@ namespace BaboKeywordPatcher
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
         {
-            //Your code here!
+            // Load our keywords once
             LoadKeywords(state);
-            // state.ExtraSettingsDataPath.
+
+            // Iterate through every winning override of armor
             foreach (var armorGetter in state.LoadOrder.PriorityOrder.WinningOverrides<IArmorGetter>())
             {
-                try
-                {
-                    // skip armor with non-default race
-                    if (armorGetter.Race != null)
-                    {
-                        armorGetter.Race.TryResolve<IRaceGetter>(state.LinkCache, out var race);
-                        if (race != null && race.EditorID != "DefaultRace") continue;
-                    }
-                    // skip armor that is non-playable or a shield
-                    if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.NonPlayable)) continue;
-                    if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.Shield)) continue;
-                    // skip armor that is head, hair, circlet, hands, feet, rings, or amulets
-                    if (armorGetter.BodyTemplate != null)
-                    {
-                        if (armorGetter.BodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Head)) continue;
-                        if (armorGetter.BodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Hair)) continue;
-                        if (armorGetter.BodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Circlet)) continue;
-                        //if (armorGetter.BodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Hands)) continue; // - Mittens
-                        if (armorGetter.BodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Ring)) continue;
-                        if (armorGetter.BodyTemplate.FirstPersonFlags.HasFlag(BipedObjectFlag.Amulet)) continue;
-                    }
-                    if (armorGetter.Keywords == null) continue;
+                // Skip shields, non‑playable, race‑specific, head/hair, etc.
+                if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.NonPlayable)) continue;
+                if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.Shield)) continue;
+                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Head) == true) continue;
+                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Hair) == true) continue;
+                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Circlet) == true) continue;
+                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Ring) == true) continue;
+                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Amulet) == true) continue;
 
-                    if (armorGetter.Name != null)
-                    {
-                        string? v = armorGetter.Name.ToString();
-                        if (v != null)
-                        {
-                            ParseName(state, armorGetter, v);
-                        }
-                    }
-                    else
-                    {
-                        if (armorGetter.EditorID != null)
-                        {
-                            ParseName(state, armorGetter, armorGetter.EditorID);
-                        }
-                    }
-                }
-                // MoreNastyCritters breaks the patching process. Ignore it.
-                catch (Exception e)
-                {
-                    System.Console.WriteLine("Caught exception: " + e);
-                }
+                // Create or fetch our editable copy
+                var armorEdit = state.PatchMod.Armors.GetOrAddAsOverride(armorGetter);
+
+                // **Unconditionally tag it**
+                if (!armorEdit.Keywords!.Contains(EroticArmor!))
+                    armorEdit.Keywords.Add(EroticArmor!);
+
+                // Save our override back into the patch
+                state.PatchMod.Armors.Set(armorEdit);
             }
-            System.Console.WriteLine("Done.");
+
+            Console.WriteLine("All armors tagged with EroticArmor.");
         }
-    }
-}
