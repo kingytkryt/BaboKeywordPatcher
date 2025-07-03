@@ -310,34 +310,36 @@ namespace BaboKeywordPatcher
 #pragma warning restore CS8604 // Possible null reference argument.
 
         public static void RunPatch(IPatcherState<ISkyrimMod, ISkyrimModGetter> state)
-        {
-            // Load our keywords once
-            LoadKeywords(state);
+{
+    LoadKeywords(state);  // sets EroticArmor
 
-            // Iterate through every winning override of armor
-            foreach (var armorGetter in state.LoadOrder.PriorityOrder.WinningOverrides<IArmorGetter>())
-            {
-                // Skip shields, non‑playable, race‑specific, head/hair, etc.
-                if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.NonPlayable)) continue;
-                if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.Shield)) continue;
-                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Head) == true) continue;
-                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Hair) == true) continue;
-                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Circlet) == true) continue;
-                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Ring) == true) continue;
-                if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Amulet) == true) continue;
+    foreach (var armorGetter in state.LoadOrder.PriorityOrder.WinningOverrides<IArmorGetter>())
+    {
+        // Skip shields, non‑playable, head/hair, etc.
+        if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.NonPlayable)) continue;
+        if (armorGetter.MajorFlags.HasFlag(Armor.MajorFlag.Shield)) continue;
+        if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Head) == true) continue;
+        if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Hair) == true) continue;
+        if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Circlet) == true) continue;
+        if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Ring) == true) continue;
+        if (armorGetter.BodyTemplate?.FirstPersonFlags.HasFlag(BipedObjectFlag.Amulet) == true) continue;
 
-                // Create or fetch our editable copy
-                var armorEdit = state.PatchMod.Armors.GetOrAddAsOverride(armorGetter);
+        // Get or create your editable override
+        var armorEdit = state.PatchMod.Armors.GetOrAddAsOverride(armorGetter);
 
-                // **Unconditionally tag it**
-                if (!armorEdit.Keywords!.Contains(EroticArmor!))
-                    armorEdit.Keywords.Add(EroticArmor!);
+        // **Ensure the Keywords list exists**
+        if (armorEdit.Keywords is null)
+            armorEdit.Keywords = new Mutagen.Bethesda.FormLinkList<Mutagen.Bethesda.IFormLinkGetter<Mutagen.Bethesda.Skyrim.IKeywordGetter>>();
 
-                // Save our override back into the patch
-                state.PatchMod.Armors.Set(armorEdit);
-            }
+        // **Unconditionally add our single tag**
+        if (!armorEdit.Keywords.Contains(EroticArmor!))
+            armorEdit.Keywords.Add(EroticArmor!);
 
-            Console.WriteLine("All armors tagged with EroticArmor.");
-        }
+        // Save it back
+        state.PatchMod.Armors.Set(armorEdit);
+    }
+
+    Console.WriteLine("Done tagging all armors.");
+}
     }
 }
