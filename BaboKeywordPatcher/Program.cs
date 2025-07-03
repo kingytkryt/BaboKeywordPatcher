@@ -339,3 +339,5 @@ namespace BaboKeywordPatcher
 
             Console.WriteLine("All armors tagged with EroticArmor.");
         }
+    }
+}
